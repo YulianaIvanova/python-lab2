@@ -174,19 +174,21 @@ class Data:
         '''
         return self.__address
 
-    def all_data(self) -> str:
+    def all_data(self) -> dict:
         '''
-        Возвращает строку со всеми объектными свойствами класса Data.
+        Возвращает словарь со всеми объектными свойствами класса Data.
         Returns
         ---------------------------------------------------------
-        str:
-            Строка вида:
-                       'telephone:__telephone, height: __height, snils: __snils ...'.
+        dict:
+            Словарь вида:
+                       {'telephone':self.__telephone, 'height': self.__height, 'snils': self.__snils ...'.}
+
         '''
-        return ("telephone"+ ':' + self.__telephone + ',' + "height"+ ':' + self.__height + ','+"snils" + ":" + self.__snils
-            + ',' + "passport_series" + ':' + self.__passport_series + ','+ "occupation" + ':'  + self.__occupation + ','
-            + "age" + ':' + self.__age + ',' + "political_views"+ ':' + self.__political_views + ',' + "worldview" + ':'
-            + self.__worldview + ',' + "address" + ':'+ self.__address)
+        key = ["telephone", "height", "snils", "passport_series", "occupation", "age", "political_views", "worldview",
+               "address"]
+        data_list = [self.__telephone, self.__height, self.__snils, self.__passport_series, self.__occupation,
+                     self.__age, self.__political_views, self.__worldview, self.__address]
+        return dict(zip(key, data_list))
 
 class Validator(Data):
     '''
@@ -400,7 +402,7 @@ parser.add_argument(
 args = parser.parse_args()
 save_data = []
 file = json.load(open(args.file_input, encoding='windows-1251'))
-output = open(args.file_output, 'w', encoding='utf-8')
+output = open(args.file_output, 'w', encoding='windows-1251')
 
 counter_valid = 0
 counter_invalid = 0
@@ -474,7 +476,8 @@ with tqdm(file, desc='Валидация записей') as progressbar:
         else:
             counter_invalid += 1
         progressbar.update(1)
-json.dump(save_data, output)
+improved_data = json.dumps(save_data, ensure_ascii=False, indent=4)
+output.write(improved_data)
 output.close()
 
 print("Статистика обработанных данных: \n1.Число валидных записей: " + str(counter_valid) +
@@ -486,4 +489,3 @@ print("Число невалидных записей по типам ошибо
       "\n6.Число невалидных записей возраста: " + str(invalid_data['age']) + "\n7.Число невалидных записей политических взглядов:" +
       str(invalid_data['political_views']) + "\n8.Число невалидных записей мировоззрений: " + str(invalid_data['worldview']) +
       "\n9.Число невалидных адрессов: " + str(invalid_data['address']))
-output.close()
